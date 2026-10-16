@@ -51,6 +51,7 @@ def add_guard_middleware(app: "FastAPI") -> None:
         raise RuntimeError("API_GUARD is enabled but fastapi-guard is not installed: `pip install fastapi-guard`.")
 
     from guard import PureASGISecurityMiddleware, SecurityConfig  # pure ASGI: SSE streams are not buffered
+    from guard_core.handlers.suspatterns_handler import ALL_DETECTION_CATEGORIES
 
     redis_url = os.getenv("API_GUARD_REDIS_URL") or None
     config = SecurityConfig(
@@ -60,6 +61,8 @@ def add_guard_middleware(app: "FastAPI") -> None:
         blacklist=_env_list("API_GUARD_BLACKLIST"),
         trusted_proxies=_env_list("API_GUARD_TRUSTED_PROXIES", "127.0.0.1,::1"),
         detection_scan_body=is_env_enabled("API_GUARD_SCAN_BODY"),
+        # Browsers send the page address as Referer, and guard-core 4.4.0 flags localhost and LAN addresses in it as ssrf.
+        enabled_detection_categories=frozenset(ALL_DETECTION_CATEGORIES) - {"ssrf"},
         enable_redis=redis_url is not None,
         redis_url=redis_url,
         enable_cors=False,  # CORS is handled by CORSMiddleware

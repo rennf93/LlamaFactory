@@ -137,6 +137,18 @@ def test_attack_in_query_is_blocked(monkeypatch: pytest.MonkeyPatch):
     assert _request(app, "GET", "/v1/models", ip="198.51.100.20", params={"q": ATTACK}).status_code == 400
 
 
+@pytest.mark.parametrize("referer", ["http://localhost:7860/", "http://127.0.0.1:7860/", "http://192.168.1.20:7860/"])
+def test_localhost_and_lan_referers_are_not_blocked(monkeypatch: pytest.MonkeyPatch, referer: str):
+    app = _make_app(monkeypatch, API_GUARD="1")
+    ip = f"198.51.100.{50 + len(referer)}"
+    assert _request(app, "GET", "/v1/models", ip=ip, headers={"Referer": referer}).status_code == 200
+
+
+def test_attack_in_referer_is_still_blocked(monkeypatch: pytest.MonkeyPatch):
+    app = _make_app(monkeypatch, API_GUARD="1")
+    assert _request(app, "GET", "/v1/models", ip="198.51.100.21", headers={"Referer": ATTACK}).status_code == 400
+
+
 def test_body_scan_is_off_by_default(monkeypatch: pytest.MonkeyPatch):
     body = {**CHAT_BODY, "messages": [{"role": "user", "content": f"explain {ATTACK}"}]}
     app = _make_app(monkeypatch, API_GUARD="1")

@@ -839,7 +839,7 @@ API_GUARD=1 API_GUARD_RATE_LIMIT=60 API_GUARD_WHITELIST=10.0.0.0/8 llamafactory-
 | `API_GUARD_SCAN_BODY` | `0` | Also scan request bodies for attack patterns. Prompts are free text, so this is off by default. |
 | `API_GUARD_REDIS_URL` | empty | Share rate-limit and ban state across workers. In-memory when unset. |
 
-Query strings, paths and headers are always screened when the guard is enabled. Streaming responses are not buffered.
+Query strings, paths and headers are always screened when the guard is enabled, for every detection category except `ssrf`: browsers send the page address as `Referer`, and guard-core 4.4.0 flags localhost and LAN addresses in it. Streaming responses are not buffered.
 
 </details>
 
