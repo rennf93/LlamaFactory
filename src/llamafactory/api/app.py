@@ -27,6 +27,7 @@ from .chat import (
     create_score_evaluation_response,
     create_stream_chat_completion_response,
 )
+from .guard import add_guard_middleware
 from .protocol import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -69,6 +70,7 @@ async def lifespan(app: "FastAPI", chat_model: "ChatModel"):  # collects GPU mem
 def create_app(chat_model: "ChatModel") -> "FastAPI":
     root_path = os.getenv("FASTAPI_ROOT_PATH", "")
     app = FastAPI(lifespan=partial(lifespan, chat_model=chat_model), root_path=root_path)
+    add_guard_middleware(app)  # before CORS so that CORS stays the outermost middleware
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],

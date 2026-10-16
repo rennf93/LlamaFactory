@@ -51,6 +51,10 @@ def is_fastapi_available():
     return _is_package_available("fastapi")
 
 
+def is_fastapi_guard_available():
+    return _is_package_available("guard")
+
+
 def is_galore_available():
     return _is_package_available("galore_torch")
 

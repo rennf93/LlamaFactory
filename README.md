@@ -820,6 +820,29 @@ API_PORT=8000 llamafactory-cli api examples/inference/qwen3.yaml infer_backend=v
 >
 > Examples: [Image understanding](scripts/api_example/test_image.py) | [Function calling](scripts/api_example/test_toolcall.py)
 
+<details><summary>Protect the API with fastapi-guard (optional)</summary>
+
+The API server has no built-in rate limit or IP policy. To add one, install [fastapi-guard](https://github.com/Guard-Core/fastapi-guard) (`requirements/guard.txt`) and set `API_GUARD=1`. It is off by default and nothing is imported unless it is enabled.
+
+```bash
+API_GUARD=1 API_GUARD_RATE_LIMIT=60 API_GUARD_WHITELIST=10.0.0.0/8 llamafactory-cli api examples/inference/qwen3.yaml
+```
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `API_GUARD` | `0` | Enable the middleware. |
+| `API_GUARD_RATE_LIMIT` | `60` | Requests per window and per client IP. |
+| `API_GUARD_RATE_LIMIT_WINDOW` | `60` | Window in seconds. |
+| `API_GUARD_WHITELIST` | empty | Comma-separated IPs/CIDRs. If set, only these clients are served. |
+| `API_GUARD_BLACKLIST` | empty | Comma-separated IPs/CIDRs to block. |
+| `API_GUARD_TRUSTED_PROXIES` | `127.0.0.1,::1` | Proxies whose `X-Forwarded-For` is trusted. Set it to your reverse proxy when you run one. |
+| `API_GUARD_SCAN_BODY` | `0` | Also scan request bodies for attack patterns. Prompts are free text, so this is off by default. |
+| `API_GUARD_REDIS_URL` | empty | Share rate-limit and ban state across workers. In-memory when unset. |
+
+Query strings, paths and headers are always screened when the guard is enabled. Streaming responses are not buffered.
+
+</details>
+
 ### Download from ModelScope Hub
 
 If you have trouble with downloading models and datasets from Hugging Face, you can use ModelScope.
